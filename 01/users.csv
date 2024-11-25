@@ -1,0 +1,101 @@
+id,gender,age,education,city
+1,Female,41,Doctoral degree,Rothsay
+2,Male,66,"Some college, no degree",Oakdale
+3,Female,39,Associate degree,Solen
+4,Female,22,Doctoral degree,Woodman
+5,Female,40,High school diploma or equivalent,Deer Grove
+6,Female,58,Associate degree,Allenport
+7,Female,56,Associate degree,Grand Marais
+8,Male,27,Bachelor’s degree,Tsaile
+9,Male,70,Master’s degree,White
+10,Female,59,Bachelor’s degree,Margaretville
+11,Female,46,High school diploma or equivalent,Vass
+12,Female,58,Bachelor’s degree,Spokane
+13,Male,68,Doctoral degree,Vermont
+14,Female,25,Associate degree,Ocala
+15,Male,49,Associate degree,Fairbank
+16,Male,45,Master’s degree,Mesa
+17,Female,67,"Some college, no degree",Flushing
+18,Female,63,Bachelor’s degree,Plato Center
+19,Female,33,Bachelor’s degree,Wilkes Barre
+20,Male,30,Bachelor’s degree,Queen City
+21,Female,33,High school diploma or equivalent,Melbourne
+22,Male,31,Less than high school,Gainestown
+23,Female,60,High school diploma or equivalent,Whiteside
+24,Female,31,"Some college, no degree",Denmark
+25,Male,26,High school diploma or equivalent,Crocketts Bluff
+26,Female,52,Less than high school,Sturgis
+27,Female,71,Doctoral degree,Jamaica
+28,Male,27,Master’s degree,West Branch
+29,Male,51,"Some college, no degree",Toast
+30,Male,22,"Some college, no degree",Riverside
+31,Female,26,Less than high school,Oxnard
+32,Female,29,Associate degree,Fiskeville
+33,Female,58,Master’s degree,Curryville
+34,Female,60,Associate degree,Spring Brook
+35,Female,56,Doctoral degree,Silverstreet
+36,Male,66,Master’s degree,Stow
+37,Male,42,Associate degree,Haysi
+38,Female,19,High school diploma or equivalent,Palo
+39,Male,50,High school diploma or equivalent,Hale
+40,Male,60,Less than high school,Worthington
+41,Male,34,Associate degree,Scranton
+42,Female,57,Bachelor’s degree,Coila
+43,Male,32,Bachelor’s degree,Pope
+44,Male,25,Bachelor’s degree,Swedesburg
+45,Female,24,High school diploma or equivalent,San Antonio
+46,Male,63,"Some college, no degree",Elka Park
+47,Female,68,Bachelor’s degree,Bronx
+48,Male,42,Master’s degree,Morganfield
+49,Male,62,"Some college, no degree",New Salem
+50,Female,62,Associate degree,Coalville
+51,Female,32,Associate degree,Bay Saint Louis
+52,Female,43,Bachelor’s degree,Wanette
+53,Female,32,Master’s degree,Tucson
+54,Male,59,Master’s degree,Kimberling City
+55,Female,69,"Some college, no degree",Custer City
+56,Female,30,Associate degree,Royalston
+57,Female,23,Associate degree,Lexington
+58,Female,63,Bachelor’s degree,Altamont
+59,Female,33,Associate degree,Thiells
+60,Female,67,Associate degree,Morral
+61,Male,72,Less than high school,Neodesha
+62,Female,63,Master’s degree,Naples
+63,Male,35,Less than high school,Longs
+64,Male,62,Doctoral degree,Barry
+65,Female,66,Master’s degree,Spokane
+66,Female,28,Master’s degree,Walnut Creek
+67,Female,72,"Some college, no degree",McKeesport
+68,Male,38,High school diploma or equivalent,Ennis
+69,Male,51,Bachelor’s degree,Clearfield
+70,Female,19,"Some college, no degree",Colonial Heights
+71,Female,32,High school diploma or equivalent,Gordon
+72,Female,22,Master’s degree,Zeigler
+73,Female,60,Bachelor’s degree,Hamden
+74,Male,26,Less than high school,Phoenix
+75,Female,34,Doctoral degree,Nardin
+76,Female,44,Doctoral degree,Garden Grove
+77,Male,67,"Some college, no degree",Coleraine
+78,Male,48,Bachelor’s degree,Duluth
+79,Female,61,Doctoral degree,Tacoma
+80,Male,34,High school diploma or equivalent,Sumner
+81,Female,76,High school diploma or equivalent,Goldendale
+82,Female,57,Doctoral degree,Hutchinson
+83,Female,25,Less than high school,Thibodaux
+84,Male,18,Less than high school,Twig
+85,Male,26,"Some college, no degree",Necedah
+86,Male,48,Less than high school,Roy
+87,Female,31,Associate degree,Chandler
+88,Male,18,Associate degree,Castalia
+89,Female,51,High school diploma or equivalent,Pendleton
+90,Female,63,"Some college, no degree",Tuscaloosa
+91,Female,53,Master’s degree,Friedensburg
+92,Male,64,Master’s degree,El Paso
+93,Female,60,Master’s degree,Blairsville
+94,Female,52,Bachelor’s degree,Ashton
+95,Male,54,Less than high school,Sandia Park
+96,Female,53,Bachelor’s degree,Thomaston
+97,Female,39,Doctoral degree,Fairplains
+98,Male,43,Associate degree,Applegate
+99,Male,77,"Some college, no degree",Brooklyn
+100,Male,64,Bachelor’s degree,Benld
