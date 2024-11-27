@@ -167,6 +167,108 @@ LIMIT 1;
 
 --Также с джоином
 
+SELECT product_category
+FROM (SELECT p.product_category, SUM(o.order_ammount) AS sum_product
+FROM products_3 as p
+JOIN orders_2 as o ON p.product_id = o.product_id
+GROUP BY p.product_category) AS category_sales
+ORDER BY sum_product DESC
+LIMIT 1;
 
+--3 Для каждой категории продуктов, определит продукт с максимальной суммой продаж в этой категории.
 
+WITH product_sales AS (
+    SELECT 
+    p.product_id,
+    p.product_name,
+    p.product_category,
+    SUM(o.order_ammount) AS total_sales
+    FROM products_3 as p
+    JOIN orders_2 as o ON p.product_id = o.product_id
+    GROUP BY p.product_id, p.product_name, p.product_category
+),
+ranked_sales AS (
+    SELECT 
+    ps.product_category,
+    ps.product_id,
+    ps.product_name,
+    ps.total_sales,
+    ROW_NUMBER() OVER (PARTITION BY ps.product_category ORDER BY ps.total_sales DESC) AS rn
+    FROM product_sales ps
+)
+SELECT 
+    product_category,
+    product_id,
+    product_name,
+    total_sales
+FROM ranked_sales
+WHERE rn = 1;
+
+--4 Из всех трех запросов можно составить сложный подзапрос:
+
+WITH 
+sales_cat AS (
+    SELECT 
+        p.product_category,
+        SUM(o.order_ammount) AS total_category_sales
+    FROM 
+        products_3 AS p
+    JOIN 
+        orders_2 AS o ON p.product_id = o.product_id
+    GROUP BY 
+        p.product_category
+),
+
+top_categ AS (
+    SELECT 
+        product_category,
+        total_category_sales
+    FROM 
+        sales_cat
+    ORDER BY 
+        total_category_sales DESC
+    LIMIT 1
+),
+
+sale_prod AS (
+    SELECT 
+        p.product_category,
+        p.product_id,
+        p.product_name,
+        SUM(o.order_ammount) AS total_product_sales,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.product_category 
+            ORDER BY SUM(o.order_ammount) DESC
+        ) AS rank_within_category
+    FROM 
+        products_3 AS p
+    JOIN 
+        orders_2 AS o ON p.product_id = o.product_id
+    GROUP BY 
+        p.product_category, p.product_id, p.product_name
+),
+
+top_prod AS (
+    SELECT 
+        product_category,
+        product_id,
+        product_name,
+        total_product_sales
+    FROM 
+        sale_prod
+    WHERE 
+        rank_within_category = 1
+)
+
+SELECT 
+    cs.product_category,
+    cs.total_category_sales,
+    tp.product_id,
+    tp.product_name,
+    tp.total_product_sales,
+    (SELECT tc.product_category FROM top_categ AS tc) AS top_sales_category
+FROM 
+    sales_cat AS cs
+LEFT JOIN 
+    top_prod AS tp ON cs.product_category = tp.product_category;
 
