@@ -97,10 +97,10 @@ SELECT
     COALESCE(delord.delayed_orders_count, 0) AS delayed_orders_count,
     COALESCE(co.cancelled_orders_count, 0) AS cancelled_orders_count,
     COALESCE(ct.total_order_amount, 0) AS total_order_amount
-FROM customers_new_3 as c
-LEFT JOIN delayed_orders delord ON c.customer_id = delord.customer_id
-LEFT JOIN cancell_orders co ON c.customer_id = co.customer_id
-LEFT JOIN customer_totals ct ON c.customer_id = ct.customer_id
+FROM customers_new_3 AS c
+LEFT JOIN delayed_orders AS delord ON c.customer_id = delord.customer_id
+LEFT JOIN cancell_orders AS co ON c.customer_id = co.customer_id
+LEFT JOIN customer_totals AS ct ON c.customer_id = ct.customer_id
 WHERE delord.customer_id IS NOT NULL OR CO.customer_id IS NOT NULL
 ORDER BY total_order_amount DESC;
 
@@ -124,4 +124,49 @@ SELECT
 FROM delay_cancel_ord
 WHERE delayed_orders > 0 OR cancelled_orders > 0
 ORDER BY total_order_amount DESC;
+
+--Задание №2.1
+
+--1 Вычислит общую сумму продаж для каждой категории продуктов
+
+SELECT p.product_category,
+(SELECT SUM(o.order_ammount) 
+ FROM orders_2 AS o 
+ WHERE o.product_id IN (
+   SELECT product_id 
+   FROM products_3 
+   WHERE product_category = p.product_category
+ )) AS total_sales
+FROM products_3 AS p
+GROUP BY p.product_category;
+
+-- Мне все же кажется, тут гораздо лучше подойдет JOIN, запрос будет короче и эффективнее
+-- потому что сейчас у нас идет повторное вычислению суммы для каждой строки в таблице `Products`, 
+-- так как подзапрос выполняется для каждой категории отдельно.
+
+SELECT p.product_category, SUM(o.order_ammount) AS sum_product
+FROM orders_2 as o
+JOIN products_3 as p ON o.product_id = p.product_id
+GROUP BY p.product_category
+
+--2 пределит категорию продукта с наибольшей общей суммой продаж.
+
+SELECT product_category
+FROM (SELECT p.product_category,
+(SELECT SUM(o.order_ammount) 
+ FROM orders_2 AS o 
+ WHERE o.product_id IN (
+   SELECT product_id 
+   FROM products_3 
+   WHERE product_category = p.product_category
+ )) AS total_sales
+FROM products_3 AS p
+GROUP BY p.product_category) AS category_sales
+ORDER BY total_sales DESC
+LIMIT 1;
+
+--Также с джоином
+
+
+
 
