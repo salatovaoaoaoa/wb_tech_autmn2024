@@ -105,8 +105,8 @@ WITH sales_sum AS (
 )
 
 SELECT DISTINCT
-date AS DATE_,
-city AS CITY,
+date AS date_,
+city,
 city_sales * 1.0 / total_sales AS SUM_SALES_REL
 FROM sales_sum
 ORDER BY date, city;
@@ -115,12 +115,12 @@ ORDER BY date, city;
 -- + я его дополнительно использовала для перепроверки
 
 SELECT
-    sa.date AS DATE_,
-    sh.city AS CITY,
+    sa.date AS date_,
+    sh.city,
     SUM(sa.qty * g.price) * 1.0 / SUM(SUM(sa.qty * g.price)) OVER (PARTITION BY sa.date) AS SUM_SALES_REL
 FROM sales AS sa
-JOIN GOODS AS g ON sa.id_good = g.id_good
-JOIN SHOPS AS sh ON sa.shopnumber = sh.shopnumber
+JOIN goods AS g ON sa.id_good = g.id_good
+JOIN shops AS sh ON sa.shopnumber = sh.shopnumber
 WHERE g.category = 'ЧИСТОТА'
 GROUP BY sa.date, sh.city
 ORDER BY sa.date, sh.city;
@@ -129,7 +129,7 @@ ORDER BY sa.date, sh.city;
 
 WITH ranked_sales AS (
   SELECT
-  sa.date AS DATE_,
+  sa.date AS date_,
   sa.shopnumber,
   sa.id_good,
   SUM(sa.qty) AS total_qty,
@@ -138,10 +138,125 @@ WITH ranked_sales AS (
   GROUP BY sa.date, sa.shopnumber, sa.id_good
 )
 
-SELECT 
-    DATE_,
+SELECT
+    date_,
     shopnumber,
     id_good
 FROM ranked_sales
 WHERE rank <= 3
 ORDER BY DATE_ DESC, shopnumber, rank;
+
+--4.
+-- в условии сказано "за предыдущую", но тогда нет смысла использовать оконные функции, 
+-- можно было бы просто отсортировать, поэтому я решила использовать накопительную сумму
+-- то есть учитывается сумма всех продаж до текущей даты (не включая). Мне кажется, это более практичный результат
+-- так мы будем видеть нарастающую сумму продаж
+
+SELECT
+s.date AS date_,
+s.shopnumber,
+g.category,
+COALESCE(SUM(s.QTY * g.PRICE)
+OVER (PARTITION BY s.SHOPNUMBER, g.CATEGORY ORDER BY s.DATE ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING), 0)
+AS PREV_SALES
+FROM sales AS s
+JOIN goods AS g ON s.id_good = g.id_good
+JOIN shops sh ON s.shopnumber = sh.shopnumber
+WHERE sh.city = 'СПб'
+ORDER BY s.shopnumber, g.category, s.date;
+
+-- но я на всякий случай также реализовала запрос,
+-- где выводится только за предыдущий день
+
+SELECT
+s.date AS date_,
+s.shopnumber,
+g.category,
+COALESCE(SUM(s.QTY * g.PRICE)
+OVER (PARTITION BY s.shopnumber, g.category
+      ORDER BY s.date ROWS BETWEEN 1 PRECEDING AND 1 PRECEDING), 0) AS prev_sales
+FROM sales AS s
+JOIN goods AS g ON s.id_good = g.id_good
+JOIN shops AS sh ON s.shopnumber = sh.shopnumber
+WHERE sh.city = 'СПб'
+ORDER BY s.shopnumber, g.category, s.date;
+
+-- Задание №3
+
+CREATE TABLE query (
+    searchid SERIAL PRIMARY KEY,
+    year INT,
+    month INT,
+    day INT,
+    userid INT,
+    ts BIGINT,
+    devicetype TEXT,
+    deviceid TEXT,
+    query TEXT
+);
+
+INSERT INTO query (year, month, day, userid, ts, devicetype, deviceid, query)
+VALUES
+(2022, 08, 23, 1, 1661266800, 'android', '101', 'к'),
+(2022, 08, 23, 1, 1661266860, 'android', '101', 'ку'),
+(2022, 08, 23, 1, 1661266890, 'android', '101', 'куп'),
+(2022, 08, 23, 1, 1661266900, 'android', '101', 'купить'),
+(2022, 08, 23, 1, 1661266910, 'android', '101', 'купить кур'),
+(2022, 08, 23, 1, 1661266930, 'android', '101', 'купить курт'),
+(2022, 08, 23, 1, 1661266940, 'android', '101', 'купить куртку'),
+(2022, 08, 23, 1, 1661266970, 'android', '101', 'купить куртку жен'),
+
+(2023, 09, 30, 2, 1696071770, 'iphone', '102', 'сумка'),
+(2023, 09, 30, 2, 1696072250, 'iphone', '102', 'сумка кожаная'),
+(2023, 09, 30, 2, 1696072310, 'iphone', '102', 'сумка кожаная черная'),
+(2023, 09, 30, 2, 1696072370, 'iphone', '102', 'сумка кожаная черная женская'),
+
+(2023, 10, 19, 3, 1697749910, 'android', '103', 'телефон'),
+(2023, 10, 19, 3, 1697749990, 'android', '103', 'телефон samsung'),
+(2023, 10, 19, 3, 1697752240, 'android', '103', 'телефон samsung galaxy'),
+(2023, 10, 19, 3, 1697752540, 'android', '103', 'телефон samsung galaxy s21'),
+
+(2023, 11, 12, 4, 1699808400, 'iphone', '104', 'ге'),
+(2023, 11, 12, 4, 1699808440, 'iphone', '104', 'гель для'),
+(2023, 11, 12, 4, 1699808500, 'iphone', '104', 'гель для душа Палмолив')
+(2024, 12, 12, 5, 1699808540, 'iphone', '104', 'гель для душа Палмолив');
+
+
+WITH ranked_queries AS (
+SELECT *,
+LEAD(query) OVER (PARTITION BY userid, deviceid ORDER BY ts) AS next_query,
+LEAD(ts) OVER (PARTITION BY userid, deviceid ORDER BY ts) AS next_ts
+FROM query),
+
+is_final_calculated AS (
+  SELECT
+  year,
+  month,
+  day,
+  userid,
+  ts,
+  devicetype,
+  deviceid,
+  query,
+  next_query,
+  CASE WHEN next_ts IS NULL THEN 1
+  WHEN next_ts - ts > 180 THEN 1
+  WHEN LENGTH(next_query) < LENGTH(query) AND (next_ts - ts > 60) THEN 2
+  ELSE 0 END AS is_final
+  FROM ranked_queries
+)
+SELECT
+    year,
+    month,
+    day,
+    userid,
+    ts,
+    devicetype,
+    deviceid,
+    query,
+    next_query,
+    is_final
+FROM is_final_calculated
+WHERE devicetype = 'android' AND is_final IN (1, 2)
+  AND year = 2023 AND month = 10 AND day = 19
+ORDER BY ts;
