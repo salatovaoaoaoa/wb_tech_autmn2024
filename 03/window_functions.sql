@@ -197,39 +197,51 @@ CREATE TABLE query (
 
 INSERT INTO query (year, month, day, userid, ts, devicetype, deviceid, query)
 VALUES
-(2022, 08, 23, 1, 1661266800, 'android', '101', 'к'),
-(2022, 08, 23, 1, 1661266860, 'android', '101', 'ку'),
-(2022, 08, 23, 1, 1661266890, 'android', '101', 'куп'),
-(2022, 08, 23, 1, 1661266900, 'android', '101', 'купить'),
-(2022, 08, 23, 1, 1661266910, 'android', '101', 'купить кур'),
-(2022, 08, 23, 1, 1661266930, 'android', '101', 'купить курт'),
-(2022, 08, 23, 1, 1661266940, 'android', '101', 'купить куртку'),
-(2022, 08, 23, 1, 1661266970, 'android', '101', 'купить куртку жен'),
+(2022, 08, 23, 1, 1661252400, 'android', '101', 'к'),
+(2022, 08, 23, 1, 1661252410, 'android', '101', 'ку'),
+(2022, 08, 23, 1, 1661252420, 'android', '101', 'куп'),
+(2022, 08, 23, 1, 1661252430, 'android', '101', 'купить'),
+(2022, 08, 23, 1, 1661253610, 'android', '101', 'купить кур'),
+(2022, 08, 23, 1, 1661253620, 'android', '101', 'купить курт'),
+(2022, 08, 23, 1, 1661253640, 'android', '101', 'купить куртку'),
+(2022, 08, 23, 1, 1661253680, 'android', '101', 'купить куртку жен'),
 
-(2023, 09, 30, 2, 1696071770, 'iphone', '102', 'сумка'),
-(2023, 09, 30, 2, 1696072250, 'iphone', '102', 'сумка кожаная'),
-(2023, 09, 30, 2, 1696072310, 'iphone', '102', 'сумка кожаная черная'),
-(2023, 09, 30, 2, 1696072370, 'iphone', '102', 'сумка кожаная черная женская'),
+(2023, 09, 30, 2, 1696061580, 'iphone', '102', 'сумка'),
+(2023, 09, 30, 2, 1696061700, 'iphone', '102', 'сумка кожаная'),
+(2023, 09, 30, 2, 1696061730, 'iphone', '102', 'сумка кожаная черная'),
+(2023, 09, 30, 2, 1696061850, 'iphone', '102', 'сумка кожаная черная женская'),
 
-(2023, 10, 19, 3, 1697749910, 'android', '103', 'телефон'),
-(2023, 10, 19, 3, 1697749990, 'android', '103', 'телефон samsung'),
-(2023, 10, 19, 3, 1697752240, 'android', '103', 'телефон samsung galaxy'),
-(2023, 10, 19, 3, 1697752540, 'android', '103', 'телефон samsung galaxy s21'),
+(2023, 10, 19, 3, 1697735970, 'android', '103', 'телефон samsung galaxy s21'),
+(2023, 10, 19, 3, 1697736090, 'android', '103', 'телефон samsung'),
+(2023, 10, 19, 3, 1697736110, 'android', '103', 'телефон samsung smart'),
+(2023, 10, 19, 3, 1697736150, 'android', '103', 'телефон samsung smart s21'),
 
-(2023, 11, 12, 4, 1699808400, 'iphone', '104', 'ге'),
-(2023, 11, 12, 4, 1699808440, 'iphone', '104', 'гель для'),
-(2023, 11, 12, 4, 1699808500, 'iphone', '104', 'гель для душа Палмолив')
-(2024, 12, 12, 5, 1699808540, 'iphone', '104', 'гель для душа Палмолив');
+(2023, 11, 12, 4, 1699772450, 'iphone', '104', 'ге'),
+(2023, 11, 12, 4, 1699772490, 'iphone', '104', 'гель для'),
+(2023, 11, 12, 4, 1699773050, 'iphone', '104', 'гель для душа Палмолив'),
+
+(2024, 12, 12, 5, 1734009050, 'iphone', '104', 'гель для душа Палмолив'),
+
+(2024, 12, 21, 6, 1734791110, 'android', '105', 'стоматология спб');
 
 
-WITH ranked_queries AS (
-SELECT *,
-LEAD(query) OVER (PARTITION BY userid, deviceid ORDER BY ts) AS next_query,
-LEAD(ts) OVER (PARTITION BY userid, deviceid ORDER BY ts) AS next_ts
-FROM query),
-
-is_final_calculated AS (
-  SELECT
+WITH conditions AS (
+  SELECT year,
+  month,
+  day,
+  userid,
+  ts,
+  devicetype,
+  deviceid,
+  query,
+  LENGTH(query) AS query_length,
+  LEAD(query) OVER (PARTITION BY userid, devicetype ORDER BY ts) AS next_query,
+  LEAD(ts) OVER (PARTITION BY userid, devicetype ORDER BY ts) AS next_ts,
+  LEAD(LENGTH(query)) OVER (PARTITION BY userid, devicetype ORDER BY ts) AS next_query_length
+  FROM query)
+SELECT *
+FROM (
+  SELECT 
   year,
   month,
   day,
@@ -239,24 +251,18 @@ is_final_calculated AS (
   deviceid,
   query,
   next_query,
-  CASE WHEN next_ts IS NULL THEN 1
+  CASE
+  WHEN next_query IS NULL THEN 1
   WHEN next_ts - ts > 180 THEN 1
-  WHEN LENGTH(next_query) < LENGTH(query) AND (next_ts - ts > 60) THEN 2
-  ELSE 0 END AS is_final
-  FROM ranked_queries
-)
-SELECT
-    year,
-    month,
-    day,
-    userid,
-    ts,
-    devicetype,
-    deviceid,
-    query,
-    next_query,
-    is_final
-FROM is_final_calculated
-WHERE devicetype = 'android' AND is_final IN (1, 2)
-  AND year = 2023 AND month = 10 AND day = 19
-ORDER BY ts;
+  WHEN next_query IS NOT NULL 
+  AND next_query_length < query_length
+  AND next_ts - ts > 60 THEN 2
+  ELSE 0
+  END AS is_final
+FROM conditions
+) filtered_data
+WHERE devicetype = 'android'
+  AND year = 2023
+  AND month = 10
+  AND day = 19
+  AND is_final IN (1, 2);

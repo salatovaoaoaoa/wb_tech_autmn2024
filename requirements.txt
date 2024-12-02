@@ -4,3 +4,4 @@ seaborn==0.13.2
 patsy==1.0.1
 scipy==1.14.1
 statsmodels==0.14.4
+black==24.10.0
